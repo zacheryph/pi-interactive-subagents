@@ -27,12 +27,12 @@ export PI_SUBAGENT_SHELL_READY_DELAY_MS=2500   # default: 500
 
 ## Tools
 
-| Tool | Description |
-| --- | --- |
-| `subagent` | Spawn a sub-agent in a dedicated tmux pane (async) |
+| Tool               | Description                                                                         |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| `subagent`         | Spawn a sub-agent in a dedicated tmux pane (async)                                  |
 | `subagent_message` | Message a sub-agent by name — steers it if running, resumes its session if finished |
-| `subagents_list` | List available agent definitions |
-| `ask_question` | *(sub-agent sessions only)* Ask the orchestrator a question and wait for the reply |
+| `subagents_list`   | List available agent definitions                                                    |
+| `ask_question`     | _(sub-agent sessions only)_ Ask the orchestrator a question and wait for the reply  |
 
 There is also a `/subagent <agent> <task>` command for spawning directly.
 
@@ -40,16 +40,20 @@ There is also a `/subagent <agent> <task>` command for spawning directly.
 
 ```typescript
 subagent({ agent: "scout", task: "Analyze the auth module" });
-subagent({ agent: "worker", name: "dark-mode", task: "Implement the dark mode toggle" });
+subagent({
+  agent: "worker",
+  name: "dark-mode",
+  task: "Implement the dark mode toggle",
+});
 ```
 
-| Parameter | Type | Default | Description |
-| --------- | ---- | ------- | ----------- |
-| `agent` | string | required | Which agent to spawn (must be known and permitted) |
-| `task` | string | required | Task prompt |
-| `name` | string | agent name | Display name for the pane and widget. Must be unique — duplicates are auto-suffixed (`scout`, `scout-2`, …) |
-| `model` | string | agent's model | Override the model for this spawn |
-| `cwd` | string | agent's `cwd` | Working directory (see [Role folders](#role-folders)) |
+| Parameter | Type   | Default       | Description                                                                                                 |
+| --------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------------- |
+| `agent`   | string | required      | Which agent to spawn (must be known and permitted)                                                          |
+| `task`    | string | required      | Task prompt                                                                                                 |
+| `name`    | string | agent name    | Display name for the pane and widget. Must be unique — duplicates are auto-suffixed (`scout`, `scout-2`, …) |
+| `model`   | string | agent's model | Override the model for this spawn                                                                           |
+| `cwd`     | string | agent's `cwd` | Working directory (see [Role folders](#role-folders))                                                       |
 
 ### Messaging
 
@@ -74,11 +78,11 @@ If the reply arrives while the sub-agent is still mid-turn, it is absorbed into 
 
 ## Bundled agents
 
-| Agent | Model | Tools | Role |
-| ----- | ----- | ----- | ---- |
-| **scout** | `openrouter/z-ai/glm-5.3` | `read`, `grep`, `find`, `ls` | Fast read-only codebase recon |
-| **researcher** | `openrouter/z-ai/glm-5.3` | `web_search`, `web_fetch`, `safe_bash` | Web research, synthesized into a sourced brief |
-| **worker** | `openrouter/z-ai/glm-5.3` | `read`, `write`, `edit`, `bash`, `web_search`, `web_fetch` + spawning | General implementer; may spawn `scout` and `researcher` |
+| Agent          | Model                             | Tools                                                                 | Role                                                    |
+| -------------- | --------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------- |
+| **scout**      | `openrouter/xiaomi/mimo-v2.6-pro` | `read`, `grep`, `find`, `ls`                                          | Fast read-only codebase recon                           |
+| **researcher** | `openrouter/xiaomi/mimo-v2.6-pro` | `web_search`, `web_fetch`, `safe_bash`                                | Web research, synthesized into a sourced brief          |
+| **worker**     | `openrouter/xiaomi/mimo-v2.6-pro` | `read`, `write`, `edit`, `bash`, `web_search`, `web_fetch` + spawning | General implementer; may spawn `scout` and `researcher` |
 
 All three are autonomous (`auto-exit: true`) and carry their identity in the system prompt (`system-prompt: append`).
 
@@ -90,7 +94,7 @@ Place a `.md` file in `.pi/agents/` (project) or `~/.pi/agent/agents/` (global).
 ---
 name: my-agent
 description: Does something specific
-model: openrouter/z-ai/glm-5.3
+model: openrouter/xiaomi/mimo-v2.6-pro
 thinking: medium
 tools: read, edit, write, safe_bash, web_search
 session-mode: lineage-only
@@ -102,22 +106,22 @@ You are a specialized agent that does X...
 
 ### Frontmatter reference
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `name` | string | Agent name (used in `agent: "my-agent"`) |
-| `description` | string | Shown in `subagents_list` |
-| `model` | string | Default model |
-| `thinking` | string | `minimal`, `low`, `medium`, or `high` |
-| `tools` | string | Strict tool allowlist. Built-ins: `read`, `write`, `edit`, `bash`, `grep`, `find`, `ls`. Extension-backed: `web_search`, `web_fetch`, `safe_bash`, `video_extract`, `youtube_search`, `google_image_search`. Only the extensions backing the listed tools are loaded into the child |
-| `subagent_agents` | string | Comma-separated agent names this agent may spawn. **Presence of this field grants the spawning toolset** (`subagent`, `subagent_message`, `subagents_list`) and restricts spawn targets to the list. Omit it and the agent cannot spawn at all |
-| `skills` | string | Comma-separated skill names to auto-load |
-| `session-mode` | string | `standalone` (default), `lineage-only`, or `fork` — see below |
-| `system-prompt` | string | `append` or `replace`: pass the body as the child's `--append-system-prompt` / `--system-prompt`. Omit and the body is prepended to the task prompt instead |
-| `auto-exit` | boolean | Auto-shutdown when the agent finishes (see below) |
-| `interactive` | boolean | Whether stall/recovery transitions wake the parent (see below) |
-| `cwd` | string | Default working directory |
-| `disable-model-invocation` | boolean | Hide from `subagents_list`; still spawnable by explicit name |
-| `cli` | string | `claude` runs the agent via the Claude Code CLI instead of pi |
+| Field                      | Type    | Description                                                                                                                                                                                                                                                                         |
+| -------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                     | string  | Agent name (used in `agent: "my-agent"`)                                                                                                                                                                                                                                            |
+| `description`              | string  | Shown in `subagents_list`                                                                                                                                                                                                                                                           |
+| `model`                    | string  | Default model                                                                                                                                                                                                                                                                       |
+| `thinking`                 | string  | `minimal`, `low`, `medium`, or `high`                                                                                                                                                                                                                                               |
+| `tools`                    | string  | Strict tool allowlist. Built-ins: `read`, `write`, `edit`, `bash`, `grep`, `find`, `ls`. Extension-backed: `web_search`, `web_fetch`, `safe_bash`, `video_extract`, `youtube_search`, `google_image_search`. Only the extensions backing the listed tools are loaded into the child |
+| `subagent_agents`          | string  | Comma-separated agent names this agent may spawn. **Presence of this field grants the spawning toolset** (`subagent`, `subagent_message`, `subagents_list`) and restricts spawn targets to the list. Omit it and the agent cannot spawn at all                                      |
+| `skills`                   | string  | Comma-separated skill names to auto-load                                                                                                                                                                                                                                            |
+| `session-mode`             | string  | `standalone` (default), `lineage-only`, or `fork` — see below                                                                                                                                                                                                                       |
+| `system-prompt`            | string  | `append` or `replace`: pass the body as the child's `--append-system-prompt` / `--system-prompt`. Omit and the body is prepended to the task prompt instead                                                                                                                         |
+| `auto-exit`                | boolean | Auto-shutdown when the agent finishes (see below)                                                                                                                                                                                                                                   |
+| `interactive`              | boolean | Whether stall/recovery transitions wake the parent (see below)                                                                                                                                                                                                                      |
+| `cwd`                      | string  | Default working directory                                                                                                                                                                                                                                                           |
+| `disable-model-invocation` | boolean | Hide from `subagents_list`; still spawnable by explicit name                                                                                                                                                                                                                        |
+| `cli`                      | string  | `claude` runs the agent via the Claude Code CLI instead of pi                                                                                                                                                                                                                       |
 
 ### session-mode
 
@@ -158,7 +162,11 @@ project/
 ```
 
 ```typescript
-subagent({ agent: "worker", cwd: "agents/sre", task: "Review the deployment pipeline" });
+subagent({
+  agent: "worker",
+  cwd: "agents/sre",
+  task: "Review the deployment pipeline",
+});
 ```
 
 Set a per-agent default with `cwd:` in frontmatter.
